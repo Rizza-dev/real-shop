@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/dbConnect";
 import Product from "@/models/Product";
+import { productSchema } from "@/utils/validators";
 import { NextResponse } from "next/server";
 
 export async function GET(req, { params }) {
@@ -42,10 +43,10 @@ export async function PATCH(req, { params }) {
   await connectDB();
   const { id } = await params;
   const body = await req.json();
-
+  const parsed = productSchema.partial().parse(body);
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(id, body, {
-     returnDocument: "after",
+    const updatedProduct = await Product.findByIdAndUpdate(id, parsed, {
+      returnDocument: "after",
       runValidators: true,
     });
 
