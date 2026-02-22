@@ -1,11 +1,18 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useFilterStore } from "@/store/useFilterStore";
+import { useEffect, useState } from "react";
 
-export default function ShopPage(){
-  const [product,setProduct] = useState([])
+export default function ShopPage({ searchParams }) {
+  const [product, setProduct] = useState([]);
+  const setFilters = useFilterStore((s) => s.setFilters);
 
-  useEffect(()=>{
+  useEffect(() => {
+    setFilters(searchParams);
+  }, [searchParams, setFilters]);
+
+  useEffect(() => {
+    // fetch data from api
     const fetchData = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/products");
@@ -14,28 +21,22 @@ export default function ShopPage(){
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-
-    }
+    };
 
     fetchData();
-  },[])
-
-  console.log(product);
-  
+  }, []);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
         <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-          {
-            product?.map((item) => (
-              <div key={item._id}>
-                <p>{item.title}</p>
-              </div>
-            ))
-          }
+          {product?.map((item) => (
+            <div key={item._id}>
+              <p>{item.title}</p>
+            </div>
+          ))}
         </h1>
       </main>
     </div>
-  )
+  );
 }
