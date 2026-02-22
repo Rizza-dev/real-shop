@@ -38,6 +38,7 @@ export async function GET(req) {
   await connectDB();
 
   const { searchParams } = new URL(req.url);
+  
   const category = searchParams.get("category");
   const minPrice = searchParams.get("minPrice");
   const maxPrice = searchParams.get("maxPrice");
