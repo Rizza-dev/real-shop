@@ -1,24 +1,40 @@
 import { create } from "zustand";
 
 export const useFilterStore = create((set) => ({
-    filters : {},
+  filters: {
+    category: "",
+    minPrice: "",
+    maxPrice: "",
+    sort: "",
+    page: 1,
+  },
 
-    setFilters: (filters) => set({ filters }),
+  setFilters: (newFilters) =>
+    set((state) => ({ filters: { ...state.filters, ...newFilters } })),
 
-    clearFilters: () => set({ filters: {} }),
+  clearFilters: () => set({ filters: {} }),
 
-    addFilter: (key, value) => set((state) => ({ filters: { ...state.filters, [key]: value } })),
+  addFilter: (key, value) =>
+    set((state) => ({ filters: { ...state.filters, [key]: value } })),
 
-    removeFilter: (key) => set((state) => ({ filters: { ...state.filters, [key]: undefined } })),
+  removeFilter: (key) =>
+    set((state) => ({ filters: { ...state.filters, [key]: undefined } })),
 
-    updateFilter: (key, value) => set((state) => ({ filters: { ...state.filters, [key]: value } })),
+  updateFilter: (key, value) =>
+    set((state) => ({ filters: { ...state.filters, [key]: value } })),
 
-    resetFilters: () => set({ filters: {} }),
+  resetFilters: () => set({ filters: {} }),
 
-    toggleFilter: (key) => set((state) => ({ filters: { ...state.filters, [key]: !state.filters[key] } })),
+  toggleFilter: (key) =>
+    set((state) => ({
+      filters: { ...state.filters, [key]: !state.filters[key] },
+    })),
 
-    toggleFilterValue: (key, value) => set((state) => ({ filters: { ...state.filters, [key]: state.filters[key] === value ? undefined : value } })),
-
-    
+  toggleFilterValue: (key, value) =>
+    set((state) => ({
+      filters: {
+        ...state.filters,
+        [key]: state.filters[key] === value ? undefined : value,
+      },
+    })),
 }));
-
