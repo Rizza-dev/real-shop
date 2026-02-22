@@ -38,28 +38,87 @@ export async function GET(req) {
   await connectDB();
 
   const { searchParams } = new URL(req.url);
-  const page = parseInt(searchParams.get("page") || 1);
-  const limit = parseInt(searchParams.get("limit") || 10);
   const category = searchParams.get("category");
+  const minPrice = searchParams.get("minPrice");
+  const maxPrice = searchParams.get("maxPrice");
+  const inStock = searchParams.get("inStock");
+  const search = searchParams.get("search");
+  const sort = searchParams.get("sort");
+
+  const page = parseInt(searchParams.get("page") || 1);
+  const limit = parseInt(searchParams.get("limit") || 12);
 
   try {
-    const query = category ? { category } : {};
-    const products = await Product.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
+    // ساخت Query داینامیک MongoDB
+
+    const filter = {};
+
+    if (category) {
+      filter.category = category;
+    }
+
+    if (inStock) {
+      filter.stock = { $gt: 0 };
+    }
+
+    if (minPrice || maxPrice) {
+      filter.price = {};
+
+      if (minPrice) {
+        filter.price.$gte = Number(minPrice);
+      }
+
+      if (maxPrice) {
+        filter.price.$gte = Number(maxPrice);
+      }
+    }
+
+    if (search) {
+      filter.title = { $regex: search, $options: "i" };
+    }
+
+    // Sorting داینامیک
+    let sortOption = { createdAt: -1 };
+
+    switch (sort) {
+      case "price-asc":
+        sortOption = { price: 1 };
+        break;
+
+      case "price-desc":
+        sortOption = { price: -1 };
+        break;
+
+      case "newest":
+        sortOption = { createdAt: -1 };
+        break;
+    }
+
+    // Pagination واقعی
+
+    const skip = (page - 1) * limit;
+
+    // گرفتن دیتا از MongoDB
+
+    const products = await Product.find(filter)
+      .sort(sortOption)
+      .skip(skip)
       .limit(limit);
 
-    const total = await Product.countDocuments(query);
+    // گرفتن تعداد کل برای pagination UI
+    const total = await Product.countDocuments(filter);
 
-    return NextResponse.json(
-      {
-        products,
+    // Response استاندارد
+
+    return NextResponse.json({
+      products,
+      pagination: {
         total,
         page,
+        limit,
         pages: Math.ceil(total / limit),
       },
-      { status: 200 },
-    );
+    });
   } catch (error) {
     return error(err.message);
   }
